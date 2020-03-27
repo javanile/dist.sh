@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+##
+# DIST.SH
+#
+# The best way to zip your source code.
+#
+# Copyright (c) 2020 Francesco Bianco <bianco@javanile.org>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+##
+
+[[ -z "${LCOV_DEBUG}" ]] || set -x
+
+set -ef
+
+cwd=${PWD}
+
+VERSION="0.1.0"
+
+error () {
+    echo "dist.sh: $1"
+    exit 1
+}
+
+scope () {
+    base=
+    dist=$1
+    tmp=$(mktemp -d -t dist-XXXXXXXXXX)
+    touch ${tmp}/.dist_include
+    touch ${tmp}/.dist_exclude
+}
+
+build () {
+    cd ${tmp}
+    echo "dist: ${dist}"
+    rm -f ${cwd}/${dist}
+    zip -qq -r ${cwd}/${dist} ./ -i "@.dist_include" -x "@.dist_exclude"
+    #echo "--[files]--"
+    #ls -LRa
+    #echo "--[include]--"
+    #cat .dist_include
+    #echo "--[exclude]--"
+    #cat .dist_exclude
+    #echo "--"
+    cd ${cwd}
+    rm -rf ${tmp}
+}
+
+clone () {
+    file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
+    zip -qq -r ${file} . -i $1
+    unzip -qq -o ${file} -d $2
+    rm -f ${file}
+}
+
+if [[ ! -e .distfile ]]; then
+    error "Missing '.distfile' in '${cwd}'."
+fi
+
+scope
+
+while IFS= read line || [[ -n "${line}" ]]; do
+    case "${line::1}" in
+        "#"|"")
+            continue
+            ;;
+        "@")
+            [[ -z "${dist}" ]] || build
+            scope ${line:1}
+            ;;
+        "!")
+            [[ -d "${line:1}" ]] && fix="/*" || fix=
+            echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
+            ;;
+        ">")
+            base="${line:1}/"
+            ;;
+        *)
+            [[ -d "${line}" ]] && fix="/*" || fix=
+            clone ${line}${fix} ${tmp}/${base}
+            echo ${base}${line}${fix} >> ${tmp}/.dist_include
+            ;;
+    esac
+done < .distfile
+
+[[ -z "${dist}" ]] && dist=dist.zip
+
+build
