@@ -76,36 +76,43 @@ clone () {
     rm -f ${file}
 }
 
-if [[ ! -e .distfile ]]; then
-    error "Missing '.distfile' in '${cwd}'."
-fi
+##
+#
+##
+main () {
+    if [[ ! -e .distfile ]]; then
+        error "Missing '.distfile' in '${cwd}'."
+    fi
 
-scope
+    scope
 
-init=
-while IFS= read line || [[ -n "${line}" ]]; do
-    case "${line::1}" in
-        "#"|"")
-            continue
-            ;;
-        "@")
-            [[ -z "${init}" ]] || build
-            scope ${line:1}
-            ;;
-        ">")
-            base="${line:1}/"
-            ;;
-        "!")
-            [[ -d "${line:1}" ]] && fix="/*" || fix=
-            echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
-            ;;
-        *)
-            [[ -d "${line}" ]] && fix="/*" || fix=
-            clone ${line}${fix} ${tmp}/${base}
-            echo ${base}${line}${fix} >> ${tmp}/.dist_include
-            ;;
-    esac
-    init=true
-done < .distfile
+    init=
+    while IFS= read line || [[ -n "${line}" ]]; do
+        case "${line::1}" in
+            "#"|"")
+                continue
+                ;;
+            "@")
+                [[ -z "${init}" ]] || build
+                scope ${line:1}
+                ;;
+            ">")
+                base="${line:1}/"
+                ;;
+            "!")
+                [[ -d "${line:1}" ]] && fix="/*" || fix=
+                echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
+                ;;
+            *)
+                [[ -d "${line}" ]] && fix="/*" || fix=
+                clone ${line}${fix} ${tmp}/${base}
+                echo ${base}${line}${fix} >> ${tmp}/.dist_include
+                ;;
+        esac
+        init=true
+    done < .distfile
 
-build
+    build
+}
+
+main
