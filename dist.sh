@@ -34,31 +34,33 @@ cwd=${PWD}
 
 VERSION="0.1.0"
 
+##
+#
+##
 error () {
     echo "dist.sh: $1"
     exit 1
 }
 
+##
+#
+##
 scope () {
     base=
-    dist=$1
+    dist=${1:-dist.zip}
     tmp=$(mktemp -d -t dist-XXXXXXXXXX)
     touch ${tmp}/.dist_include
     touch ${tmp}/.dist_exclude
 }
 
+##
+#
+##
 build () {
     cd ${tmp}
     echo "dist: ${dist}"
     rm -f ${cwd}/${dist}
     zip -qq -r ${cwd}/${dist} ./ -i "@.dist_include" -x "@.dist_exclude"
-    #echo "--[files]--"
-    #ls -LRa
-    #echo "--[include]--"
-    #cat .dist_include
-    #echo "--[exclude]--"
-    #cat .dist_exclude
-    #echo "--"
     cd ${cwd}
     rm -rf ${tmp}
 }
@@ -76,13 +78,14 @@ fi
 
 scope
 
+init=
 while IFS= read line || [[ -n "${line}" ]]; do
     case "${line::1}" in
         "#"|"")
             continue
             ;;
         "@")
-            [[ -z "${dist}" ]] || build
+            [[ -z "${init}" ]] || build
             scope ${line:1}
             ;;
         "!")
@@ -98,8 +101,7 @@ while IFS= read line || [[ -n "${line}" ]]; do
             echo ${base}${line}${fix} >> ${tmp}/.dist_include
             ;;
     esac
+    init=true
 done < .distfile
-
-[[ -z "${dist}" ]] && dist=dist.zip
 
 build

@@ -1,8 +1,9 @@
 ##
-##
+#
+#
 ##
 
-#@dist/Fixtures-full.zip
+@dist/file_${VERSION}.zip
 
 >fixtures
 
@@ -17,7 +18,7 @@ file2.txt
 
 file1.txt
 
-#@dist/Fixtures-full2.zip
+@dist/Fixtures-full2.zip
 
 >fixtures
 
