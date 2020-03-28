@@ -3,23 +3,21 @@
 #
 ##
 
-@dist/file_${VERSION}.zip
-
+@dist/dist1.zip
 >fixtures
-
 !dir/file4.txt
 !.distfile
 !dist
-
 dir
 file2.txt
-
 >other
-
 file1.txt
 
-@dist/Fixtures-full2.zip
-
+@dist/dist2.zip
 >fixtures
+file2.txt
 
+@dist/dist3.zip
+>a/b/c/d
+dir
 file2.txt

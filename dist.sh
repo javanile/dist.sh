@@ -71,6 +71,7 @@ build () {
 clone () {
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
+    mkdir -p $2
     unzip -qq -o ${file} -d $2
     rm -f ${file}
 }
