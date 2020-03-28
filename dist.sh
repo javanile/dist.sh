@@ -65,6 +65,9 @@ build () {
     rm -rf ${tmp}
 }
 
+##
+#
+##
 clone () {
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
@@ -88,12 +91,12 @@ while IFS= read line || [[ -n "${line}" ]]; do
             [[ -z "${init}" ]] || build
             scope ${line:1}
             ;;
+        ">")
+            base="${line:1}/"
+            ;;
         "!")
             [[ -d "${line:1}" ]] && fix="/*" || fix=
             echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
-            ;;
-        ">")
-            base="${line:1}/"
             ;;
         *)
             [[ -d "${line}" ]] && fix="/*" || fix=
