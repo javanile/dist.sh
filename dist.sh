@@ -69,9 +69,9 @@ build () {
 #
 ##
 copy () {
+    mkdir -p $2
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
-    mkdir -p $2
     unzip -qq -o ${file} -d $2
     rm -f ${file}
 }
@@ -93,21 +93,25 @@ main () {
                 continue
                 ;;
             "&")
-                cd ${tmp}
-                ${line:1}
+                cd ${tmp}/${base}
+                eval ${line:1}
                 cd ${cwd}
                 continue
                 ;;
             "@")
                 [[ -z "${init}" ]] || build
-                scope ${line:1}
+                scope "$(echo ${line:1} | envsubst)"
                 ;;
             ">")
-                base="${line:1}/"
+                base="$(echo ${line:1} | envsubst)/"
                 ;;
             "!")
                 [[ -d "${line:1}" ]] && fix="/*" || fix=
                 echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
+                ;;
+            "+")
+                [[ -d "${line:1}" ]] && fix="/*" || fix=
+                echo ${base}${line:1}${fix} >> ${tmp}/.dist_include
                 ;;
             *)
                 [[ -d "${line}" ]] && fix="/*" || fix=
