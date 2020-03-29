@@ -68,7 +68,7 @@ build () {
 ##
 #
 ##
-clone () {
+copy () {
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
     mkdir -p $2
@@ -92,6 +92,12 @@ main () {
             "#"|"")
                 continue
                 ;;
+            "&")
+                cd ${tmp}
+                ${line:1}
+                cd ${cwd}
+                continue
+                ;;
             "@")
                 [[ -z "${init}" ]] || build
                 scope ${line:1}
@@ -105,7 +111,7 @@ main () {
                 ;;
             *)
                 [[ -d "${line}" ]] && fix="/*" || fix=
-                clone ${line}${fix} ${tmp}/${base}
+                copy ${line}${fix} ${tmp}/${base}
                 echo ${base}${line}${fix} >> ${tmp}/.dist_include
                 ;;
         esac

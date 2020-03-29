@@ -10,6 +10,7 @@
 !dist
 dir
 file2.txt
+&cp file2.txt file5.txt
 >other
 file1.txt
 
