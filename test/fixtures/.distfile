@@ -8,25 +8,8 @@
 &export VERSION=$(cat ${cwd}/../../dist.sh | grep VERSION | head -n 1 | sed 's/.*VERSION//' | tr -d \\"=)
 &source ${cwd}/.env
 &export VAR1
+&export VAR3
 
 @dist/dist1.zip
 
->fixtures-${VERSION}
-!dir/file4.txt
-!.distfile
-!dist
-dir
-file2.txt
-&cp file2.txt file5.txt
-+file5.txt
->other
-file1.txt
-
-@dist/dist2-${VAR1}.zip
->fixtures
-file2.txt
-
-@dist/dist3.zip
->a/b/c/d
-dir
-file2.txt
+${VAR3}

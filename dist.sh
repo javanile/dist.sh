@@ -106,17 +106,23 @@ main () {
                 base="$(echo ${line:1} | envsubst)/"
                 ;;
             "!")
-                [[ -d "${line:1}" ]] && fix="/*" || fix=
-                echo ${base}${line:1}${fix} | envsubst >> ${tmp}/.dist_exclude
+                line="$(echo ${line:1} | envsubst)"
+                [[ -z "${line}" ]] && continue
+                [[ -d "${line}" ]] && fix="/*" || fix=
+                echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
                 ;;
             "+")
-                [[ -d "${line:1}" ]] && fix="/*" || fix=
-                echo ${base}${line:1}${fix} | envsubst >> ${tmp}/.dist_include
+                line="$(echo ${line:1} | envsubst)"
+                [[ -z "${line}" ]] && continue
+                [[ -d "${line}" ]] && fix="/*" || fix=
+                echo ${base}${line}${fix} >> ${tmp}/.dist_include
                 ;;
             *)
+                line="$(echo ${line} | envsubst)"
+                [[ -z "${line}" ]] && continue
                 [[ -d "${line}" ]] && fix="/*" || fix=
                 copy ${line}${fix} ${tmp}/${base}
-                echo ${base}${line}${fix} | envsubst >> ${tmp}/.dist_include
+                echo ${base}${line}${fix} >> ${tmp}/.dist_include
                 ;;
         esac
         init=true
