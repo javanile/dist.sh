@@ -107,16 +107,16 @@ main () {
                 ;;
             "!")
                 [[ -d "${line:1}" ]] && fix="/*" || fix=
-                echo ${base}${line:1}${fix} >> ${tmp}/.dist_exclude
+                echo ${base}${line:1}${fix} | envsubst >> ${tmp}/.dist_exclude
                 ;;
             "+")
                 [[ -d "${line:1}" ]] && fix="/*" || fix=
-                echo ${base}${line:1}${fix} >> ${tmp}/.dist_include
+                echo ${base}${line:1}${fix} | envsubst >> ${tmp}/.dist_include
                 ;;
             *)
                 [[ -d "${line}" ]] && fix="/*" || fix=
                 copy ${line}${fix} ${tmp}/${base}
-                echo ${base}${line}${fix} >> ${tmp}/.dist_include
+                echo ${base}${line}${fix} | envsubst >> ${tmp}/.dist_include
                 ;;
         esac
         init=true
