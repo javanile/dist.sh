@@ -15,3 +15,8 @@
 ${VAR3}
 
 cron
+
+dir2
+!dir2/dir2-b
+!dir2/dir1-a/dir2-a-1.txt
+

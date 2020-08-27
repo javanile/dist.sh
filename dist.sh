@@ -80,7 +80,7 @@ copy () {
     mkdir -p $2
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
-    unzip -qq -o ${file} -d $2 && true 2> /dev/null
+    unzip -qq -o ${file} -d $2 > /dev/null 2>&1 && true
     rm -f ${file}
 }
 
