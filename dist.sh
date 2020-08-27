@@ -34,11 +34,18 @@ cwd=${PWD}
 
 VERSION="0.1.0"
 
+failure() {
+  local lineno=$1
+  local msg=$2
+  echo "Failed at $lineno: $msg"
+}
+#trap 'failure "${LINENO}" "$BASH_COMMAND"' 0
+
 ##
 #
 ##
 error () {
-    echo "dist.sh: $1"
+    echo "[dist.sh] $1"
     exit 1
 }
 
@@ -58,11 +65,12 @@ scope () {
 ##
 build () {
     cd ${tmp}
-    echo "dist: ${dist}"
-    rm -f ${cwd}/${dist}
-    zip -qq -r ${cwd}/${dist} ./ -i "@.dist_include" -x "@.dist_exclude"
-    cd ${cwd}
+    echo -n "[dist.sh] File created: '${dist}', size="
+    rm -f "${cwd}/${dist}"
+    zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
+    stat -c %s "${cwd}/${dist}" | numfmt --to=iec
     rm -rf ${tmp}
+    cd ${cwd}
 }
 
 ##
@@ -72,7 +80,7 @@ copy () {
     mkdir -p $2
     file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
     zip -qq -r ${file} . -i $1
-    unzip -qq -o ${file} -d $2
+    unzip -qq -o ${file} -d $2 && true 2> /dev/null
     rm -f ${file}
 }
 
