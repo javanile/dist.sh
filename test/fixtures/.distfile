@@ -13,3 +13,5 @@
 @dist/dist1.zip
 
 ${VAR3}
+
+cron
