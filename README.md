@@ -13,6 +13,6 @@ dist:
 
 ```bash
 curl -i "https://git.io" \
-     -F "url=https://raw.githubusercontent.com/javanile/dist.sh/master/dist.sh" \
-     -F "code=dist.sh"
+     -d "url=https://raw.githubusercontent.com/javanile/dist.sh/master/dist.sh" \
+     -d "code=dist.sh"
 ```
