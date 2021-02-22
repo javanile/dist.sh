@@ -55,7 +55,8 @@ error () {
 scope () {
     base=
     dist=${1:-dist.zip}
-    tmp=$(mktemp -d -t dist-XXXXXXXXXX)
+    tmp="${cwd}$(mktemp -d -t dist-XXXXXXXXXX)"
+    mkdir -p "${tmp}"
     touch ${tmp}/.dist_include
     touch ${tmp}/.dist_exclude
 }
