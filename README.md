@@ -19,7 +19,13 @@ Create in your workstation a file called `.distfile` like this
 !*.secret
 ```
 
-With this simple file your create a ZIP with all `.ssh/` and `.config` directoris but with exclusion of all file with `.secret` extension.
+Run the following command
+
+```shell
+dist.sh
+```
+
+With this simple file you create a ZIP with all `.ssh/` and `.config` directoris but with exclusion of all file with `.secret` extension.
 
 ## Documantation
 
