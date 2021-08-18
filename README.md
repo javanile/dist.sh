@@ -37,7 +37,7 @@ The `.distfile` process instruction based on first char of line, all control cha
 - `@` - Create ZIP file, you can create multiple ZIP file at same time
 - `>` - Change root directory into ZIP file
 - `+` - Add directory or file to ZIP file
-- `!` - Exclude specific directory of file from ZIP file
+- `!` - Exclude specific directory or file from ZIP file
 - `&` - Execute a shell command
 - `#` - Comment line
 
