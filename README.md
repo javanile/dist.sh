@@ -4,9 +4,32 @@ Create complex ZIP in a minute. With this tool you can create a ZIP file with cu
 
 ## Installation
 
-Download [dist.sh](https://raw.githubusercontent.com/javanile/dist.sh/master/dist.sh) file into your workstation
+Download [dist.sh](https://raw.githubusercontent.com/javanile/dist.sh/master/dist.sh) file into your workstation at `/usr/local/bin/dist.sh`, than set exectuing permission with `chmod +x /usr/local/bin/dist.sh`.
 
+## Usage
 
+Create in your workstation a file called `.distfile` like this
+
+```
+## File: .distfile
+@mybackup.zip
+
++.ssh/*
++.config/*
+!*.secret
+```
+
+With this simple file your create a ZIP with all `.ssh/` and `.config` directoris but with exclusion of all file with `.secret` extension.
+
+## Documantation
+
+The `.distfile` process instruction based on first char of line, all control char are listed here:
+
+- `@` - Create ZIP file, you can create multiple ZIP file at same time
+- `+` - Add directory or file to ZIP file
+- `!` - Exclude specific directory of file from ZIP file
+- `&` - Execute a shell command
+- `#` - Comment line
 
 ## Good to know 
 
