@@ -1,6 +1,6 @@
 # dist.sh
 
-Create complex ZIP in a minute. With this tool you can create a ZIP file with custom structure.
+Create complex ZIP file in a minute. With this tool you can create a ZIP file with custom structure, useful to backup your data instad on manyally picking stuff one by one or good for distrubute your software avoiding to leave into ZIP file your secret data.
 
 ## Installation
 
