@@ -6,7 +6,8 @@ Create complex ZIP in a minute. With this tool you can create a ZIP file with cu
 
 Quick installation
 - Download [dist.sh](https://raw.githubusercontent.com/javanile/dist.sh/master/dist.sh) file into your workstation 
-- Move to `/usr/local/bin/dist.sh`, than set exectuing permission with `chmod +x /usr/local/bin/dist.sh`.
+- Move to `/usr/local/bin/dist.sh` or wherever you prefer
+- Than set exectuing permission with `chmod +x /usr/local/bin/dist.sh`.
 
 ## Usage
 
