@@ -28,7 +28,7 @@ Run the following command
 dist.sh
 ```
 
-With this simple file you create a ZIP with all `.ssh/` and `.config` directories but with exclusion of all file with `*.secret` extension.
+With this simple instructions you create a ZIP file with all `.ssh/` and `.config/` directories but without all files `*.secret`.
 
 ## Documantation
 
