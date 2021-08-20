@@ -56,6 +56,26 @@ dist:
      curl -sL git.io/dist.sh | bash -
 ```
 
+### Package manager
+
+BPKG
+
+```shell
+bpkg install -g javanile/dist.sh
+```
+
+BPKG/CI
+
+```shell
+curl -sL git.io/bpkg-install | curl -s javanile/dist.sh
+```
+
+Binst.tk
+
+```shell
+curl binst.tk | curl -s javanile/dist.sh
+```
+
 ### Short url
 
 ```bash
