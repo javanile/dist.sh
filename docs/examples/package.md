@@ -14,6 +14,8 @@ Create a software package is an important stage on development process, this too
 
 ## Create Laravel Package
 
+In this example the `vendor/` directory is ignored
+
 ```shell
 ## File: .distfile
 &export VERSION=1.0.0
@@ -28,7 +30,7 @@ storage
 Then run
 
 ```shell
-cd ${HOME} && dist.sh
+dist.sh
 ```
 
 ## Create Next.js Package

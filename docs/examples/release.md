@@ -14,6 +14,8 @@ Create a software release is an important stage on development process, this too
 
 ## Create Laravel Release
 
+In this example the `vendor/` directory is included into release
+
 ```shell
 ## File: .distfile
 &export VERSION=1.0.0
