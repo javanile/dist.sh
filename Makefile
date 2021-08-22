@@ -27,4 +27,4 @@ dev: init
 init: editorconfig
 
 editorconfig:
-	curl -so .editorconfig https://editorconfig.javanile.org/lib/shell
+	@curl -so .editorconfig https://editorconfig.javanile.org/lib/shell
