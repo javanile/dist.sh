@@ -11,7 +11,9 @@ has_children: false
 Create a Software Package is an important stage on development process, this tool help you to create an elegant and simple manifest to recreate your package on the fly. This is useful to save your artifact at the end of CI/CD process. 
 
 ```
-TIP: Often the Software Package must be as lean as possible in fact it should not include any pre-installed software dependencies, which will therefore be downloaded when needed.
+TIP: Often the Software Package must be as lean as possible,
+in fact it should not include any pre-installed software dependencies, 
+which will therefore be downloaded when needed.
 ```
 
 ## Create Laravel Package
