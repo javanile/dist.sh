@@ -86,11 +86,11 @@ curl -i "https://git.io" \
 
 ### Contributing
 
-Thank you for considering contributing to this project! The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
+Thank you for considering contributing to this project! The contribution guide can be found in the [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ### Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](CONTRIBUTING.md).
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](docs/CONTRIBUTING.md#code-of-conduct).
 
 ### Security Vulnerabilities
 
