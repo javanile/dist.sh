@@ -1,6 +1,6 @@
 ---
 layout: default
-title: dist.sh
+title: "📦 dist.sh"
 nav_order: 1
 has_children: false
 ---
