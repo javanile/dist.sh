@@ -1,4 +1,4 @@
-# dist.sh
+# 📦 dist.sh
 
 Create complex ZIP file in a minute. With this tool you can create a ZIP file with custom structure, useful to backup your data instead of manually picking stuff one by one, or good for distrubute your software avoiding to leave your private data into ZIP file.
 
