@@ -34,7 +34,7 @@ cwd=${PWD}
 debug_mode=0
 default_dist="$(basename "${cwd}").zip"
 
-VERSION="0.1.0"
+VERSION="0.2.0"
 
 failure() {
   local lineno=$1
@@ -127,7 +127,7 @@ parse() {
     if [ "${char}" = "@" ]; then
       [ -z "${init}" ] || build
       if [ "${mode}" = "build" ]; then
-        scope "$(echo "${data}" | envsubst)"
+        scope "${data}"
       elif [ "${dist}" != "${data}" ]; then
         pass=true
       else
@@ -151,22 +151,22 @@ parse() {
         base="${data}/"
         ;;
       "!")
-        echo "EXLUDE: [${distfile}] ${line:1}"
+        echo "EXLUDE: [${distfile}] ${data}"
         [ -d "${data}" ] && fix="/*" || fix=
-        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_exclude"
+        echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
-        [ -d "${data}" ] && fix="/*" || fix=
-        copy "${data}${fix}" "${tmp}/${base}"
-        echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_include"
+        [ -d "${line}" ] && fix="/*" || fix=
+        copy "${line}${fix}" "${tmp}/${base}"
+        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
 
-        if [ -f "${import}${data}/.distfile" ]; then
-          echo "${base}${import}${data}/.distfile" >> "${tmp}/.dist_exclude"
-          parse import "${import}${data}/.distfile" "${import}${data}/" "${dist}"
+        if [ -f "${import}${line}/.distfile" ]; then
+          echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
+          parse import "${import}${line}/.distfile" "${import}${line}/" "${dist}"
         fi
         ;;
     esac
