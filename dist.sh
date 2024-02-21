@@ -80,76 +80,80 @@ build () {
 #
 ##
 copy () {
-    mkdir -p $2
-    file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
-    zip -qq -r ${file} . -i $1
-    unzip -qq -o ${file} -d $2 > /dev/null 2>&1 && true
-    rm -f ${file}
+  mkdir -p "$2"
+  file=$(mktemp -t dist-clone-XXXXXXXXXX).zip
+  zip -qq -r "${file}" . -i "$1"
+  unzip -qq -o "${file}" -d "$2" > /dev/null 2>&1 && true
+  rm -f "${file}"
 }
 
+##
+#
+##
 parse() {
   local mode
+  local line
 
   mode=$1
   distfile=$2
+  import=$3
 
   case "${mode}" in
     "build")
       scope
       ;;
-    "include")
-      echo "Include: $distfile"
+    "import")
+      echo "Import: $distfile"
       ;;
   esac
 
-
-
   init=
-  while IFS= read line || [[ -n "${line}" ]]; do
-      case "${line::1}" in
-          "#"|"")
-              continue
-              ;;
-          "&")
-              cd ${tmp}/${base}
-              eval ${line:1}
-              cd ${cwd}
-              continue
-              ;;
-          "@")
-              [[ -z "${init}" ]] || build
-              scope "$(echo ${line:1} | envsubst)"
-              ;;
-          ">")
-              base="$(echo ${line:1} | envsubst)/"
-              ;;
-          "!")
-              line="$(echo ${line:1} | envsubst)"
-              [[ -z "${line}" ]] && continue
-              [[ -d "${line}" ]] && fix="/*" || fix=
-              echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
-              ;;
-          "+")
-              line="$(echo ${line:1} | envsubst)"
-              [[ -z "${line}" ]] && continue
-              [[ -d "${line}" ]] && fix="/*" || fix=
-              echo ${base}${line}${fix} >> ${tmp}/.dist_include
-              ;;
-          *)
-              line="$(echo ${line} | envsubst)"
-              [[ -z "${line}" ]] && continue
-              [[ -d "${line}" ]] && fix="/*" || fix=
-              copy ${line}${fix} ${tmp}/${base}
-              echo ${base}${line}${fix} >> ${tmp}/.dist_include
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    case "${line::1}" in
+      "#"|"")
+        continue
+        ;;
+      "&")
+        cd "${tmp}/${base}"
+        eval "${line:1}"
+        cd "${cwd}"
+        continue
+        ;;
+      "@")
+        [[ -z "${init}" ]] || build
+        scope "$(echo ${line:1} | envsubst)"
+        ;;
+      ">")
+        base="$(echo ${line:1} | envsubst)/"
+        ;;
+      "!")
+        echo "EXLUDE: [${distfile}] ${line:1}"
+        line="$(echo "${line:1}" | envsubst)"
+        [[ -z "${line}" ]] && continue
+        [[ -d "${line}" ]] && fix="/*" || fix=
+        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_exclude"
+        ;;
+      "+")
+        line="$(echo ${line:1} | envsubst)"
+        [[ -z "${line}" ]] && continue
+        [[ -d "${line}" ]] && fix="/*" || fix=
+        echo "${base}${line}${fix}" >> "${tmp}/.dist_include"
+        ;;
+      *)
+        line="$(echo "${line}" | envsubst)"
+        [[ -z "${line}" ]] && continue
+        [[ -d "${line}" ]] && fix="/*" || fix=
+        copy "${line}${fix}" "${tmp}/${base}"
+        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
 
-              if [ -f "${line}/.distfile" ]; then
-                echo "${base}${line}/.distfile" >> "${tmp}/.dist_exclude"
-                parse include "${line}/.distfile"
-                exit
-              fi
-              ;;
-      esac
-      init=true
+        if [ -f "${line}/.distfile" ]; then
+          echo "${base}${line}/.distfile" >> "${tmp}/.dist_exclude"
+          parse import "${line}/.distfile" "${line}/"
+          exit
+        fi
+        ;;
+    esac
+    init=true
   done < "${distfile}"
 
   build
