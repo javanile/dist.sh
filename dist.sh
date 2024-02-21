@@ -56,8 +56,9 @@ error () {
 scope() {
   base=
   dist=${1:-$(basename "${cwd}").zip}
+  name=$(basename "${dist}" .zip)
   date=$(date +%Y%m%d%H%M%S)
-  tmp="${cwd}$(mktemp -d -t "dist-${date}-XXXXXXXXXX")"
+  tmp="${cwd}$(mktemp -d -t "dist-${name}-${date}-XXXXXXXXXX")"
   mkdir -p "${tmp}"
   touch "${tmp}/.dist_include"
   touch "${tmp}/.dist_exclude"
@@ -103,7 +104,7 @@ parse() {
       scope
       ;;
     "import")
-      echo "Import: $distfile"
+      echo "Import: $distfile ($import)"
       ;;
   esac
 
@@ -146,10 +147,9 @@ parse() {
         copy "${line}${fix}" "${tmp}/${base}"
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
 
-        if [ -f "${line}/.distfile" ]; then
-          echo "${base}${line}/.distfile" >> "${tmp}/.dist_exclude"
-          parse import "${line}/.distfile" "${line}/"
-          exit
+        if [ -f "${import}${line}/.distfile" ]; then
+          echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
+          parse import "${import}${line}/.distfile" "${import}${line}/"
         fi
         ;;
     esac
