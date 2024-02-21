@@ -75,7 +75,7 @@ build () {
   zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
   stat -c %s "${cwd}/${dist}" | numfmt --to=iec
   #rm -rf "${tmp}"
-  cd "${cwd}"
+  cd "${cwd}" && true
 }
 
 ##
@@ -92,8 +92,18 @@ copy () {
 ##
 #
 ##
+debug () {
+  echo "$1" >&2
+}
+
+##
+#
+##
 parse() {
   local mode
+  local distfile
+  local import
+
   local char
   local line
   local init
@@ -103,7 +113,6 @@ parse() {
   mode=$1
   distfile=$2
   import=$3
-  pack=$4
   pass=
   init=
 
@@ -114,7 +123,7 @@ parse() {
     "import")
       init=true
       [ "${dist}" != "${default_dist}" ] && pass=true
-      echo "Import: $distfile ($import)"
+      #echo "Import: $distfile ($import)"
       ;;
   esac
 
@@ -128,6 +137,7 @@ parse() {
       [ -z "${init}" ] || build
       if [ "${mode}" = "build" ]; then
         scope "${data}"
+        continue
       elif [ "${dist}" != "${data}" ]; then
         pass=true
       else
@@ -151,29 +161,32 @@ parse() {
         base="${data}/"
         ;;
       "!")
-        echo "EXLUDE: [${distfile}] ${data}"
+        debug "> ${dist} > ${distfile} > ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
+        debug "> ${dist} > ${distfile} > ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
+        debug "> ${dist} > ${distfile} > ${line}"
         [ -d "${line}" ] && fix="/*" || fix=
         copy "${line}${fix}" "${tmp}/${base}"
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
-
         if [ -f "${import}${line}/.distfile" ]; then
           echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
-          parse import "${import}${line}/.distfile" "${import}${line}/" "${dist}"
+          parse import "${import}${line}/.distfile" "${import}${line}/"
         fi
         ;;
     esac
     init=true
   done < "${distfile}"
 
-  build
+  if [ "${mode}" = "build" ]; then
+    build
+  fi
 }
 
 
@@ -185,7 +198,7 @@ main () {
     error "Missing '.distfile' in '${cwd}'."
   fi
 
-  parse build "${cwd}/.distfile"
+  parse build .distfile
 }
 
 main

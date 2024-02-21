@@ -3,8 +3,8 @@
 cd "$(dirname "$0")/../fixtures/recursive"
 rm -fr tmp && true
 
-ls -Rla
+#ls -Rla
 
 ../../../dist.sh
 
-unzip -l recursive.zip
+#unzip -l recursive.zip

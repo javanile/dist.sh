@@ -1,5 +1,5 @@
 
 !file5.txt
 
-&echo "DISTFILE: ${distfile}"
-&pwd
+#&echo "DISTFILE: ${distfile}"
+#&pwd
