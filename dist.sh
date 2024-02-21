@@ -104,10 +104,13 @@ parse() {
   local distfile
   local import
 
-  local char
   local line
+  local char
+  local data
+
   local init
-  local pack
+  local pass
+
   local fix
 
   mode=$1
