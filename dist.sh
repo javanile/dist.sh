@@ -174,7 +174,7 @@ parse() {
         echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
-        debug "> ${dist} > ${distfile} > ${line}"
+        debug "> ${dist} > ${distfile} >  ${line}"
         [ -d "${line}" ] && fix="/*" || fix=
         copy "${line}${fix}" "${tmp}/${base}"
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
