@@ -32,6 +32,7 @@ set -ef
 
 cwd=${PWD}
 debug_mode=0
+default_dist="$(basename "${cwd}").zip"
 
 VERSION="0.1.0"
 
@@ -55,7 +56,7 @@ error () {
 ##
 scope() {
   base=
-  dist=${1:-$(basename "${cwd}").zip}
+  dist=${1:-${default_dist}}
   name=$(basename "${dist}" .zip)
   date=$(date +%Y%m%d%H%M%S)
   tmp="${cwd}$(mktemp -d -t "dist-${name}-${date}-XXXXXXXXXX")"
@@ -97,6 +98,7 @@ parse() {
   local line
   local init
   local pack
+  local fix
 
   mode=$1
   distfile=$2
@@ -111,20 +113,22 @@ parse() {
       ;;
     "import")
       init=true
-      [ "${pack}" != "${dist}" ] && pass=true
+      [ "${dist}" != "${default_dist}" ] && pass=true
       echo "Import: $distfile ($import)"
       ;;
   esac
 
   while IFS= read -r line || [ -n "${line}" ]; do
-    path="${line:1}"
     char="${line::1}"
+    data="$(echo "${line:1}" | envsubst)"
+
+    [ -z "${data}" ] && continue
 
     if [ "${char}" = "@" ]; then
       [ -z "${init}" ] || build
       if [ "${mode}" = "build" ]; then
-        scope "$(echo "${path}" | envsubst)"
-      elif [ "${dist}" != "${path}" ]; then
+        scope "$(echo "${data}" | envsubst)"
+      elif [ "${dist}" != "${data}" ]; then
         pass=true
       else
         pass=
@@ -139,36 +143,30 @@ parse() {
         ;;
       "&")
         cd "${tmp}/${base}${import}"
-        eval "${line:1}"
+        eval "${data}"
         cd "${cwd}"
         continue
         ;;
       ">")
-        base="$(echo "${line:1}" | envsubst)/"
+        base="${data}/"
         ;;
       "!")
         echo "EXLUDE: [${distfile}] ${line:1}"
-        line="$(echo "${line:1}" | envsubst)"
-        [[ -z "${line}" ]] && continue
-        [[ -d "${line}" ]] && fix="/*" || fix=
+        [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
-        line="$(echo "${line:1}" | envsubst)"
-        [[ -z "${line}" ]] && continue
-        [[ -d "${line}" ]] && fix="/*" || fix=
-        echo "${base}${line}${fix}" >> "${tmp}/.dist_include"
+        [ -d "${data}" ] && fix="/*" || fix=
+        echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
-        line="$(echo "${line}" | envsubst)"
-        [[ -z "${line}" ]] && continue
-        [[ -d "${line}" ]] && fix="/*" || fix=
-        copy "${line}${fix}" "${tmp}/${base}"
-        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
+        [ -d "${data}" ] && fix="/*" || fix=
+        copy "${data}${fix}" "${tmp}/${base}"
+        echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_include"
 
-        if [ -f "${import}${line}/.distfile" ]; then
-          echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
-          parse import "${import}${line}/.distfile" "${import}${line}/" "${dist}"
+        if [ -f "${import}${data}/.distfile" ]; then
+          echo "${base}${import}${data}/.distfile" >> "${tmp}/.dist_exclude"
+          parse import "${import}${data}/.distfile" "${import}${data}/" "${dist}"
         fi
         ;;
     esac
