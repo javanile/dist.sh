@@ -68,13 +68,13 @@ scope() {
 #
 ##
 build () {
-    cd "${tmp}"
-    echo -n "[dist.sh] File created: '${dist}', size="
-    rm -f "${cwd}/${dist}"
-    zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
-    stat -c %s "${cwd}/${dist}" | numfmt --to=iec
-    #rm -rf "${tmp}"
-    cd "${cwd}"
+  cd "${tmp}"
+  echo -n "[dist.sh] File created: '${dist}', size="
+  rm -f "${cwd}/${dist}"
+  zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
+  stat -c %s "${cwd}/${dist}" | numfmt --to=iec
+  #rm -rf "${tmp}"
+  cd "${cwd}"
 }
 
 ##
@@ -115,17 +115,17 @@ parse() {
         continue
         ;;
       "&")
-        cd "${tmp}/${base}"
+        cd "${tmp}/${base}${import}"
         eval "${line:1}"
         cd "${cwd}"
         continue
         ;;
       "@")
         [[ -z "${init}" ]] || build
-        scope "$(echo ${line:1} | envsubst)"
+        scope "$(echo "${line:1}" | envsubst)"
         ;;
       ">")
-        base="$(echo ${line:1} | envsubst)/"
+        base="$(echo "${line:1}" | envsubst)/"
         ;;
       "!")
         echo "EXLUDE: [${distfile}] ${line:1}"
@@ -135,7 +135,7 @@ parse() {
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
-        line="$(echo ${line:1} | envsubst)"
+        line="$(echo "${line:1}" | envsubst)"
         [[ -z "${line}" ]] && continue
         [[ -d "${line}" ]] && fix="/*" || fix=
         echo "${base}${line}${fix}" >> "${tmp}/.dist_include"
