@@ -54,24 +54,24 @@ error () {
 ##
 scope () {
     base=
-    dist=${1:-dist.zip}
+    dist=${1:-$(basename "${cwd}").zip}
     tmp="${cwd}$(mktemp -d -t dist-XXXXXXXXXX)"
     mkdir -p "${tmp}"
-    touch ${tmp}/.dist_include
-    touch ${tmp}/.dist_exclude
+    touch "${tmp}/.dist_include"
+    touch "${tmp}/.dist_exclude"
 }
 
 ##
 #
 ##
 build () {
-    cd ${tmp}
+    cd "${tmp}"
     echo -n "[dist.sh] File created: '${dist}', size="
     rm -f "${cwd}/${dist}"
     zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
     stat -c %s "${cwd}/${dist}" | numfmt --to=iec
-    rm -rf ${tmp}
-    cd ${cwd}
+    rm -rf "${tmp}"
+    cd "${cwd}"
 }
 
 ##
@@ -85,59 +85,68 @@ copy () {
     rm -f ${file}
 }
 
+parse() {
+  local mode
+
+  mode=$1
+
+  scope
+
+      init=
+      while IFS= read line || [[ -n "${line}" ]]; do
+          case "${line::1}" in
+              "#"|"")
+                  continue
+                  ;;
+              "&")
+                  cd ${tmp}/${base}
+                  eval ${line:1}
+                  cd ${cwd}
+                  continue
+                  ;;
+              "@")
+                  [[ -z "${init}" ]] || build
+                  scope "$(echo ${line:1} | envsubst)"
+                  ;;
+              ">")
+                  base="$(echo ${line:1} | envsubst)/"
+                  ;;
+              "!")
+                  line="$(echo ${line:1} | envsubst)"
+                  [[ -z "${line}" ]] && continue
+                  [[ -d "${line}" ]] && fix="/*" || fix=
+                  echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
+                  ;;
+              "+")
+                  line="$(echo ${line:1} | envsubst)"
+                  [[ -z "${line}" ]] && continue
+                  [[ -d "${line}" ]] && fix="/*" || fix=
+                  echo ${base}${line}${fix} >> ${tmp}/.dist_include
+                  ;;
+              *)
+                  line="$(echo ${line} | envsubst)"
+                  [[ -z "${line}" ]] && continue
+                  [[ -d "${line}" ]] && fix="/*" || fix=
+                  copy ${line}${fix} ${tmp}/${base}
+                  echo ${base}${line}${fix} >> ${tmp}/.dist_include
+                  ;;
+          esac
+          init=true
+      done < .distfile
+
+      build
+}
+
+
 ##
 #
 ##
 main () {
-    if [[ ! -e .distfile ]]; then
-        error "Missing '.distfile' in '${cwd}'."
-    fi
+  if [[ ! -e .distfile ]]; then
+    error "Missing '.distfile' in '${cwd}'."
+  fi
 
-    scope
-
-    init=
-    while IFS= read line || [[ -n "${line}" ]]; do
-        case "${line::1}" in
-            "#"|"")
-                continue
-                ;;
-            "&")
-                cd ${tmp}/${base}
-                eval ${line:1}
-                cd ${cwd}
-                continue
-                ;;
-            "@")
-                [[ -z "${init}" ]] || build
-                scope "$(echo ${line:1} | envsubst)"
-                ;;
-            ">")
-                base="$(echo ${line:1} | envsubst)/"
-                ;;
-            "!")
-                line="$(echo ${line:1} | envsubst)"
-                [[ -z "${line}" ]] && continue
-                [[ -d "${line}" ]] && fix="/*" || fix=
-                echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
-                ;;
-            "+")
-                line="$(echo ${line:1} | envsubst)"
-                [[ -z "${line}" ]] && continue
-                [[ -d "${line}" ]] && fix="/*" || fix=
-                echo ${base}${line}${fix} >> ${tmp}/.dist_include
-                ;;
-            *)
-                line="$(echo ${line} | envsubst)"
-                [[ -z "${line}" ]] && continue
-                [[ -d "${line}" ]] && fix="/*" || fix=
-                copy ${line}${fix} ${tmp}/${base}
-                echo ${base}${line}${fix} >> ${tmp}/.dist_include
-                ;;
-        esac
-        init=true
-    done < .distfile
-
-    build
+  parse build "${cwd}/.distfile"
 }
 
 main

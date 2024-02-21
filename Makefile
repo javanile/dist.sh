@@ -28,3 +28,10 @@ init: editorconfig
 
 editorconfig:
 	@curl -so .editorconfig https://editorconfig.javanile.org/lib/shell
+
+## =====
+## Tests
+## =====
+
+test-default:
+	@bash tests/bare/default-test.sh
