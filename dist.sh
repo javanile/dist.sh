@@ -93,24 +93,47 @@ copy () {
 ##
 parse() {
   local mode
+  local char
   local line
+  local init
+  local pack
 
   mode=$1
   distfile=$2
   import=$3
+  pack=$4
+  pass=
+  init=
 
   case "${mode}" in
     "build")
       scope
       ;;
     "import")
+      init=true
+      [ "${pack}" != "${dist}" ] && pass=true
       echo "Import: $distfile ($import)"
       ;;
   esac
 
-  init=
-  while IFS= read -r line || [[ -n "${line}" ]]; do
-    case "${line::1}" in
+  while IFS= read -r line || [ -n "${line}" ]; do
+    path="${line:1}"
+    char="${line::1}"
+
+    if [ "${char}" = "@" ]; then
+      [ -z "${init}" ] || build
+      if [ "${mode}" = "build" ]; then
+        scope "$(echo "${path}" | envsubst)"
+      elif [ "${dist}" != "${path}" ]; then
+        pass=true
+      else
+        pass=
+      fi
+    fi
+
+    [ -n "${pass}" ] && continue
+
+    case "${char}" in
       "#"|"")
         continue
         ;;
@@ -119,10 +142,6 @@ parse() {
         eval "${line:1}"
         cd "${cwd}"
         continue
-        ;;
-      "@")
-        [[ -z "${init}" ]] || build
-        scope "$(echo "${line:1}" | envsubst)"
         ;;
       ">")
         base="$(echo "${line:1}" | envsubst)/"
@@ -149,7 +168,7 @@ parse() {
 
         if [ -f "${import}${line}/.distfile" ]; then
           echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
-          parse import "${import}${line}/.distfile" "${import}${line}/"
+          parse import "${import}${line}/.distfile" "${import}${line}/" "${dist}"
         fi
         ;;
     esac
