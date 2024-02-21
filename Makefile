@@ -35,3 +35,6 @@ editorconfig:
 
 test-default:
 	@bash tests/bare/default-test.sh
+
+test-recursive:
+	@bash tests/bare/recursive-test.sh

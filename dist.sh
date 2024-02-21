@@ -31,6 +31,7 @@
 set -ef
 
 cwd=${PWD}
+debug_mode=0
 
 VERSION="0.1.0"
 
@@ -52,13 +53,14 @@ error () {
 ##
 #
 ##
-scope () {
-    base=
-    dist=${1:-$(basename "${cwd}").zip}
-    tmp="${cwd}$(mktemp -d -t dist-XXXXXXXXXX)"
-    mkdir -p "${tmp}"
-    touch "${tmp}/.dist_include"
-    touch "${tmp}/.dist_exclude"
+scope() {
+  base=
+  dist=${1:-$(basename "${cwd}").zip}
+  date=$(date +%Y%m%d%H%M%S)
+  tmp="${cwd}$(mktemp -d -t "dist-${date}-XXXXXXXXXX")"
+  mkdir -p "${tmp}"
+  touch "${tmp}/.dist_include"
+  touch "${tmp}/.dist_exclude"
 }
 
 ##
@@ -70,7 +72,7 @@ build () {
     rm -f "${cwd}/${dist}"
     zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
     stat -c %s "${cwd}/${dist}" | numfmt --to=iec
-    rm -rf "${tmp}"
+    #rm -rf "${tmp}"
     cd "${cwd}"
 }
 
@@ -89,52 +91,68 @@ parse() {
   local mode
 
   mode=$1
+  distfile=$2
 
-  scope
+  case "${mode}" in
+    "build")
+      scope
+      ;;
+    "include")
+      echo "Include: $distfile"
+      ;;
+  esac
 
-      init=
-      while IFS= read line || [[ -n "${line}" ]]; do
-          case "${line::1}" in
-              "#"|"")
-                  continue
-                  ;;
-              "&")
-                  cd ${tmp}/${base}
-                  eval ${line:1}
-                  cd ${cwd}
-                  continue
-                  ;;
-              "@")
-                  [[ -z "${init}" ]] || build
-                  scope "$(echo ${line:1} | envsubst)"
-                  ;;
-              ">")
-                  base="$(echo ${line:1} | envsubst)/"
-                  ;;
-              "!")
-                  line="$(echo ${line:1} | envsubst)"
-                  [[ -z "${line}" ]] && continue
-                  [[ -d "${line}" ]] && fix="/*" || fix=
-                  echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
-                  ;;
-              "+")
-                  line="$(echo ${line:1} | envsubst)"
-                  [[ -z "${line}" ]] && continue
-                  [[ -d "${line}" ]] && fix="/*" || fix=
-                  echo ${base}${line}${fix} >> ${tmp}/.dist_include
-                  ;;
-              *)
-                  line="$(echo ${line} | envsubst)"
-                  [[ -z "${line}" ]] && continue
-                  [[ -d "${line}" ]] && fix="/*" || fix=
-                  copy ${line}${fix} ${tmp}/${base}
-                  echo ${base}${line}${fix} >> ${tmp}/.dist_include
-                  ;;
-          esac
-          init=true
-      done < .distfile
 
-      build
+
+  init=
+  while IFS= read line || [[ -n "${line}" ]]; do
+      case "${line::1}" in
+          "#"|"")
+              continue
+              ;;
+          "&")
+              cd ${tmp}/${base}
+              eval ${line:1}
+              cd ${cwd}
+              continue
+              ;;
+          "@")
+              [[ -z "${init}" ]] || build
+              scope "$(echo ${line:1} | envsubst)"
+              ;;
+          ">")
+              base="$(echo ${line:1} | envsubst)/"
+              ;;
+          "!")
+              line="$(echo ${line:1} | envsubst)"
+              [[ -z "${line}" ]] && continue
+              [[ -d "${line}" ]] && fix="/*" || fix=
+              echo ${base}${line}${fix} >> ${tmp}/.dist_exclude
+              ;;
+          "+")
+              line="$(echo ${line:1} | envsubst)"
+              [[ -z "${line}" ]] && continue
+              [[ -d "${line}" ]] && fix="/*" || fix=
+              echo ${base}${line}${fix} >> ${tmp}/.dist_include
+              ;;
+          *)
+              line="$(echo ${line} | envsubst)"
+              [[ -z "${line}" ]] && continue
+              [[ -d "${line}" ]] && fix="/*" || fix=
+              copy ${line}${fix} ${tmp}/${base}
+              echo ${base}${line}${fix} >> ${tmp}/.dist_include
+
+              if [ -f "${line}/.distfile" ]; then
+                echo "${base}${line}/.distfile" >> "${tmp}/.dist_exclude"
+                parse include "${line}/.distfile"
+                exit
+              fi
+              ;;
+      esac
+      init=true
+  done < "${distfile}"
+
+  build
 }
 
 
