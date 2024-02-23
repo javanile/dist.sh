@@ -36,6 +36,9 @@ default_dist="$(basename "${cwd}").zip"
 
 VERSION="0.2.0"
 
+##
+#
+##
 usage() {
   echo "Usage: ./dist.sh [OPTION]..."
   echo ""
@@ -46,9 +49,12 @@ usage() {
   echo "  -h, --help          Display this help and exit"
   echo "  -v, --version       Display current version"
   echo ""
-  echo "Documentation can be found at https://github.com/javanile/lcov.sh"
+  echo "Documentation can be found at https://github.com/javanile/dist.sh"
 }
 
+##
+#
+##
 failure() {
   local lineno=$1
   local msg=$2
