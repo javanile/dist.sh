@@ -31,7 +31,7 @@
 set -ef
 
 cwd=${PWD}
-debug_mode=0
+debug_mode=
 default_dist="$(basename "${cwd}").zip"
 
 VERSION="0.2.0"
@@ -82,18 +82,26 @@ scope() {
   mkdir -p "${tmp}"
   touch "${tmp}/.dist_include"
   touch "${tmp}/.dist_exclude"
+  if [ -n "${debug_mode}" ]; then
+    echo
+    echo "| ${dist} |"
+  fi
 }
 
 ##
 #
 ##
 build () {
+  local dist_dir
+
   cd "${tmp}"
-  echo -n "[dist.sh] File created: '${dist}', size="
+  dist_dir=$(dirname "${cwd}/${dist}")
+  [ -d "${dist_dir}" ] || mkdir -p "${dist_dir}" && true >/dev/null 2>&1
   rm -f "${cwd}/${dist}"
   zip -qq -r "${cwd}/${dist}" ./ -i "@.dist_include" -x "@.dist_exclude"
+  echo -n "Package was created: '${dist}', size="
   stat -c %s "${cwd}/${dist}" | numfmt --to=iec
-  #rm -rf "${tmp}"
+  [ -z "${debug_mode}" ] && rm -rf "${tmp}"
   cd "${cwd}" && true
 }
 
@@ -112,7 +120,9 @@ copy () {
 #
 ##
 debug () {
-  echo "$1" >&2
+  if [ -n "${debug_mode}" ]; then
+    echo "$1" >&2
+  fi
 }
 
 ##
@@ -156,7 +166,11 @@ parse() {
     [ -z "${data}" ] && continue
 
     if [ "${char}" = "@" ]; then
-      [ -z "${init}" ] || build
+      if [ -n "${init}" ]; then
+        build
+      else
+        debug "Default package '${dist}' was skipped."
+      fi
       if [ "${mode}" = "build" ]; then
         scope "${data}"
         continue
@@ -183,17 +197,18 @@ parse() {
         base="${data}/"
         ;;
       "!")
-        debug "> ${dist} > ${distfile} > ${line}"
+        debug "| ${dist} | ${distfile} | ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
-        debug "> ${dist} > ${distfile} > ${line}"
+        debug "| ${dist} | ${distfile} | ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
-        debug "> ${dist} > ${distfile} >  ${line}"
+        debug "| ${dist} | ${distfile} |  ${line}"
+        [ -e "${line}" ] || error "Resource not found: '${line}' claimed by '${distfile}'."
         [ -d "${line}" ] && fix="/*" || fix=
         copy "${line}${fix}" "${tmp}/${base}"
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
@@ -210,7 +225,6 @@ parse() {
     build
   fi
 }
-
 
 ##
 #
@@ -235,4 +249,4 @@ main () {
   parse build .distfile
 }
 
-main $@
+main "$@"

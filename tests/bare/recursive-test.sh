@@ -5,6 +5,6 @@ rm -fr tmp && true
 
 #ls -Rla
 
-../../../dist.sh
+../../../dist.sh --debug
 
 #unzip -l recursive.zip
