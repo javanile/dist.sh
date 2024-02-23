@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+set -e
 
-cd "$(dirname "$0")/../fixtures/default"
+cd "$(dirname "$0")/../fixtures/default" || exit 1
 rm -fr tmp && true
+#ls -Rla
 
-ls -Rla
+echo "====[ Default test ]========================================================"
+../../../dist.sh --debug
+echo
 
-../../../dist.sh
-
+echo "---"
 unzip -l default.zip

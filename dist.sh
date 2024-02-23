@@ -36,6 +36,19 @@ default_dist="$(basename "${cwd}").zip"
 
 VERSION="0.2.0"
 
+usage() {
+  echo "Usage: ./dist.sh [OPTION]..."
+  echo ""
+  echo "Create package files (ZIP at moment) as defined into .distfile"
+  echo ""
+  echo "List of available options"
+  echo "  -d, --debug         Show debug information"
+  echo "  -h, --help          Display this help and exit"
+  echo "  -v, --version       Display current version"
+  echo ""
+  echo "Documentation can be found at https://github.com/javanile/lcov.sh"
+}
+
 failure() {
   local lineno=$1
   local msg=$2
@@ -47,8 +60,8 @@ failure() {
 #
 ##
 error () {
-    echo "[dist.sh] $1"
-    exit 1
+  echo "$1" >&2
+  exit 1
 }
 
 ##
@@ -197,11 +210,23 @@ parse() {
 #
 ##
 main () {
+  while true; do
+    case "$1" in
+      -d|--debug) debug_mode=1; ;;
+      -v|--version) echo "dist.sh - by Francesco Bianco <bianco@javanile.org>"; exit ;;
+      -h|--help) usage; exit ;;
+      --) shift; break ;;
+      "") break ;;
+      *) error "Syntax error: unknown option '$1'"; ;;
+    esac
+    shift
+  done
+
   if [[ ! -e .distfile ]]; then
-    error "Missing '.distfile' in '${cwd}'."
+    error "File not found: looking for '.distfile' on '${cwd}'."
   fi
 
   parse build .distfile
 }
 
-main
+main $@

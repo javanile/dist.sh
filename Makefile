@@ -38,3 +38,6 @@ test-default:
 
 test-recursive:
 	@bash tests/bare/recursive-test.sh
+
+test-errors:
+	@bash tests/bare/errors-test.sh
