@@ -168,17 +168,18 @@ parse() {
 
     if [ "${char}" = "@" ]; then
       if [ -n "${init}" ]; then
-        build
+        [ "${mode}" = "build" ] && build
       else
         debug "Default package '${dist}' was skipped."
       fi
       if [ "${mode}" = "build" ]; then
         scope "${data}"
         continue
-      elif [ "${dist}" != "${data}" ]; then
-        pass=true
-      else
+      elif [ "${dist}" = "${data}" ]; then
         pass=
+        continue
+      else
+        pass=true
       fi
     fi
 
@@ -195,25 +196,25 @@ parse() {
         continue
         ;;
       ">")
-        debug "| ${dist} | ${distfile} | ${line}"
+        debug "| ${dist} | ${distfile} | ${base} | ${line}"
         base="${data}/"
         ;;
       "!")
-        debug "| ${dist} | ${distfile} | ${line}"
+        debug "| ${dist} | ${distfile} | ${base} | ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${import}${data}${fix}" >> "${tmp}/.dist_exclude"
         ;;
       "+")
-        debug "| ${dist} | ${distfile} | ${line}"
+        debug "| ${dist} | ${distfile} | ${base} | ${line}"
         [ -d "${data}" ] && fix="/*" || fix=
         echo "${base}${data}${fix}" >> "${tmp}/.dist_include"
         ;;
       *)
-        debug "| ${dist} | ${distfile} |  ${line}"
-        [ -e "${line}" ] || error "Resource not found: '${line}' claimed by '${distfile}'."
+        debug "| ${dist} | ${distfile} | ${base} |  ${line}"
+        [ -e "${import}${line}" ] || error "Resource not found: '${line}' claimed by '${distfile}'."
         [ -d "${line}" ] && fix="/*" || fix=
-        copy "${line}${fix}" "${tmp}/${base}"
-        echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
+        copy "${line}${fix}" "${tmp}/${import}${base}"
+        echo "${import}${base}${line}${fix}" >> "${tmp}/.dist_include"
         if [ -f "${import}${line}/.distfile" ]; then
           parse import "${import}${line}/.distfile" "${import}${line}/"
         fi
