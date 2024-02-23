@@ -213,7 +213,8 @@ parse() {
         debug "| ${dist} | ${distfile} | ${base} |  ${line}"
         [ -e "${import}${line}" ] || error "Resource not found: '${line}' claimed by '${distfile}'."
         [ -d "${line}" ] && fix="/*" || fix=
-        copy "${line}${fix}" "${tmp}/${import}${base}"
+        #echo copy "${import}${line}${fix}" "${tmp}/${import}${base}"
+        copy "${import}${line}${fix}" "${tmp}/${import}${base}"
         echo "${import}${base}${line}${fix}" >> "${tmp}/.dist_include"
         if [ -f "${import}${line}/.distfile" ]; then
           parse import "${import}${line}/.distfile" "${import}${line}/"
