@@ -1,9 +1,11 @@
 
-
-
 @sample.zip
 dir1
 !dir1/pippo.txt
 
-@pippo/prova.zip
-aa
+>1
+dir1
+!dir1/pippo.txt
+
+>2
+dir1

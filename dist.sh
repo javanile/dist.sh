@@ -82,6 +82,7 @@ scope() {
   mkdir -p "${tmp}"
   touch "${tmp}/.dist_include"
   touch "${tmp}/.dist_exclude"
+  echo "*/.distfile" > "${tmp}/.dist_exclude"
   if [ -n "${debug_mode}" ]; then
     echo
     echo "| ${dist} |"
@@ -194,6 +195,7 @@ parse() {
         continue
         ;;
       ">")
+        debug "| ${dist} | ${distfile} | ${line}"
         base="${data}/"
         ;;
       "!")
@@ -213,7 +215,6 @@ parse() {
         copy "${line}${fix}" "${tmp}/${base}"
         echo "${base}${import}${line}${fix}" >> "${tmp}/.dist_include"
         if [ -f "${import}${line}/.distfile" ]; then
-          echo "${base}${import}${line}/.distfile" >> "${tmp}/.dist_exclude"
           parse import "${import}${line}/.distfile" "${import}${line}/"
         fi
         ;;
